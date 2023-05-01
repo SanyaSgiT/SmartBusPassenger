@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">SmartBusPassenger</string>
+    <string name="register">Регистрация</string>
+    <string name="log_in">Вход</string>
+    <string name="welcome">Добро пожаловать в SmartBus!</string>
+    <string name="login">Логин</string>
+    <string name="password">Пароль</string>
+    <string name="log_in_acc">Вход в аккаунт</string>
+    <string name="question_register">Еще нет аккаунта?</string>
+    <string name="reg_in">Зарегистрироваться</string>
+    <string name="name">Имя Фамилия</string>
+    <string name="password2">Повторите пароль</string>
+    <string name="log_in2">Войти в аккаунт</string>
+    <string name="question2">Уже есть аккаунт?</string>
+    <string name="enter_route">Введите искомый маршрут</string>
+</resources>
