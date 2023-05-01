@@ -1,4 +1,4 @@
-package com.example.smartbuspassenger.data.service
+package com.example.smartbuspassenger.data.models
 
 import com.example.smartbuspassenger.domain.Token
 import com.example.smartbuspassenger.domain.User

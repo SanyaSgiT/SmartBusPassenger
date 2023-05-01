@@ -1,4 +1,9 @@
 package com.example.smartbuspassenger.domain
 
-class Token {
-}
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Token(
+    val token: String,
+    val type: String = "Bearer"
+)

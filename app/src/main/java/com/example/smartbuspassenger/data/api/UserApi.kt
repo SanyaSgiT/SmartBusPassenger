@@ -1,7 +1,8 @@
 package com.example.smartbuspassenger.data.api
 
-import com.example.smartbuspassenger.data.service.CreateUserRequest
-import com.example.smartbuspassenger.data.service.LoginRequest
+import com.example.smartbuspassenger.data.models.AuthResponse
+import com.example.smartbuspassenger.data.models.CreateUserRequest
+import com.example.smartbuspassenger.data.models.LoginRequest
 import com.example.smartbuspassenger.domain.User
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -13,8 +14,8 @@ interface UserApi {
     suspend fun getUser(@Path("id") id: Int): User?
 
     @POST("account/login")
-    suspend fun authentication(@Body loginRequest: LoginRequest): User?
+    suspend fun authentication(@Body loginRequest: LoginRequest): AuthResponse
 
     @POST("account/register")
-    suspend fun createUser(@Body createUserRequest: CreateUserRequest): User?
+    suspend fun createUser(@Body createUserRequest: CreateUserRequest): AuthResponse
 }

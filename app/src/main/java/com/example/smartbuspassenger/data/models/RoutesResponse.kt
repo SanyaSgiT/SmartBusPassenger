@@ -1,4 +1,4 @@
-package com.example.smartbuspassenger.data.service
+package com.example.smartbuspassenger.data.models
 
 import com.example.smartbuspassenger.domain.Route
 import kotlinx.serialization.Serializable

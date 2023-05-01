@@ -7,13 +7,12 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.smartbuspassenger.MapActivity
 import com.example.smartbuspassenger.R
-import com.example.smartbuspassenger.data.service.CreateUserRequest
-import com.example.smartbuspassenger.di.interceptor
-import com.example.smartbuspassenger.di.userApi
+import com.example.smartbuspassenger.data.api.UserApi
+import com.example.smartbuspassenger.data.models.CreateUserRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.android.ext.android.inject
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var btnLogin: TextView
@@ -22,17 +21,17 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var name: TextView
     private lateinit var password: TextView
 
+    private val userApi: UserApi by inject()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.registration)
+        setContentView(R.layout.activity_registration)
         btnLogin = findViewById(R.id.logInText)
         btnReg = findViewById(R.id.registerButton)
 
         login = findViewById(R.id.login)
         name = findViewById(R.id.name)
         password = findViewById(R.id.password)
-
-        interceptor.level = HttpLoggingInterceptor.Level.BODY
 
         btnLogin.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))

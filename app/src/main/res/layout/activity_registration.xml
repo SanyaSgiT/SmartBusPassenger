@@ -74,6 +74,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/password"
             android:layout_width="match_parent"
+            android:inputType="textPassword"
             android:layout_height="match_parent" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -92,6 +93,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/return_password"
             android:layout_width="match_parent"
+            android:inputType="textPassword"
             android:layout_height="match_parent" />
     </com.google.android.material.textfield.TextInputLayout>
 

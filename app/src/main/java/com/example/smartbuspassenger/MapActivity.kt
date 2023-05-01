@@ -7,9 +7,11 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.textfield.TextInputEditText
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
@@ -26,8 +28,12 @@ class MapActivity : AppCompatActivity(), TrafficListener {
     private var levelText: TextView? = null
     private var levelIcon: ImageButton? = null
     private var trafficLevel: TrafficLevel? = null
-    private var trafficFreshness: MapActivity.TrafficFreshness? = null
+    private var trafficFreshness: TrafficFreshness? = null
     private var traffic: TrafficLayer? = null
+
+    private lateinit var searchEditText: EditText
+    private lateinit var bottomBar: BottomNavigationView
+    private lateinit var recycler: RecyclerView
 
     private enum class TrafficFreshness {
         Loading, OK, Expired
@@ -37,7 +43,7 @@ class MapActivity : AppCompatActivity(), TrafficListener {
         super.onCreate(savedInstanceState)
         MapKitFactory.setApiKey("6af80549-c660-4137-8516-d039ad43dc6e")
         MapKitFactory.initialize(this)
-        setContentView(R.layout.map)
+        setContentView(R.layout.activity_map)
 
         mapview = findViewById(R.id.mapview)
         mapview!!.map.move(
@@ -47,10 +53,23 @@ class MapActivity : AppCompatActivity(), TrafficListener {
 
         levelText = findViewById<TextView>(R.id.traffic_light_text)
         levelIcon = findViewById<ImageButton>(R.id.traffic_light)
-        traffic = MapKitFactory.getInstance().createTrafficLayer(mapview!!.getMapWindow())
+        traffic = MapKitFactory.getInstance().createTrafficLayer(mapview!!.mapWindow)
         traffic!!.isTrafficVisible = true
         traffic!!.addTrafficListener(this)
         updateLevel()
+
+        setupSearch()
+    }
+
+    private fun setupSearch() {
+        val textInput = findViewById<TextInputEditText>(R.id.searchEditText)
+        val recyclerView = findViewById<RecyclerView>(R.id.recycler)
+
+        textInput.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) return@setOnFocusChangeListener
+
+            recyclerView.isVisible = true
+        }
     }
 
     override fun onStop() {
@@ -70,9 +89,9 @@ class MapActivity : AppCompatActivity(), TrafficListener {
         var level: String? = ""
         if (!traffic!!.isTrafficVisible) {
             iconId = R.drawable.rec_grey
-        } else if (trafficFreshness == MapActivity.TrafficFreshness.Loading) {
+        } else if (trafficFreshness == TrafficFreshness.Loading) {
             iconId = R.drawable.rec_violet
-        } else if (trafficFreshness == MapActivity.TrafficFreshness.Expired) {
+        } else if (trafficFreshness == TrafficFreshness.Expired) {
             iconId = R.drawable.rec_blue
         } else if (trafficLevel == null) {  // state is fresh but region has no data
             iconId = R.drawable.rec_grey
@@ -102,25 +121,21 @@ class MapActivity : AppCompatActivity(), TrafficListener {
 
     override fun onTrafficChanged(trafficLevel: TrafficLevel?) {
         this.trafficLevel = trafficLevel
-        trafficFreshness = MapActivity.TrafficFreshness.OK
+        trafficFreshness = TrafficFreshness.OK
         updateLevel()
     }
 
     override fun onTrafficLoading() {
         trafficLevel = null
-        trafficFreshness = MapActivity.TrafficFreshness.Loading
+        trafficFreshness = TrafficFreshness.Loading
         updateLevel()
     }
 
     override fun onTrafficExpired() {
         trafficLevel = null
-        trafficFreshness = MapActivity.TrafficFreshness.Expired
+        trafficFreshness = TrafficFreshness.Expired
         updateLevel()
     }
-
-    private lateinit var searchEditText: EditText
-    private lateinit var bottomBar: BottomNavigationView
-    private lateinit var recycler: RecyclerView
 
     private fun setupBindings() {
 //        recycler = findViewById(R.id.recycler)
