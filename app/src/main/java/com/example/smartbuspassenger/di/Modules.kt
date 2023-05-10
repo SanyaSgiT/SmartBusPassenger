@@ -6,7 +6,7 @@ package com.example.smartbuspassenger.di
 //import com.example.bookcrossingapplication.ui.user.UserViewModel
 import com.example.smartbuspassenger.data.api.TransportApi
 import com.example.smartbuspassenger.data.api.UserApi
-import com.example.smartbuspassenger.data.functional.RoutesFunctions
+import com.example.smartbuspassenger.data.repository.RoutesRepository
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -16,7 +16,7 @@ import org.koin.dsl.module
 import retrofit2.Retrofit
 
 val dataModule = module {
-    factory { RoutesFunctions(get()) }
+    factory { RoutesRepository(get()) }
 }
 
 //val presentationModule = module {

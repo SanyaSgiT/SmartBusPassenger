@@ -40,20 +40,32 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <ImageButton
+        android:id="@+id/recyclerGetter"
+        android:layout_width="50dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginEnd="20dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/white"
+        app:layout_constraintTop_toTopOf="@+id/findRoute"
+        app:layout_constraintEnd_toEndOf="@+id/findRoute"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="72dp"
         android:background="@color/white"
         android:visibility="gone"
         android:elevation="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/findRoute"
-        tools:visibility="visible" />
+        tools:visibility="visible"
+        tools:itemCount="5"
+        tools:listitem="@layout/item_route"/>
 
     <ImageButton
         android:id="@+id/traffic_light"
@@ -72,7 +84,7 @@
         android:id="@+id/traffic_light_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="25dp"
+        android:layout_marginEnd="20dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
         app:layout_constraintBottom_toBottomOf="@+id/traffic_light"
         app:layout_constraintEnd_toEndOf="@+id/traffic_light"

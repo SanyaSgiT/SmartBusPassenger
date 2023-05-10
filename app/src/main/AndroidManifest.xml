@@ -30,6 +30,19 @@
             android:exported="false" />
         <activity
             android:name=".MapActivity"
+            android:exported="false"
+            android:windowSoftInputMode="stateAlwaysHidden"/>
+        <activity
+            android:name=".ui.account.CardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.bottombar.UserActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.bottombar.EditActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.bottombar.InfoActivity"
             android:exported="false" />
     </application>
 

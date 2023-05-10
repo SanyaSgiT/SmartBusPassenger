@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/menu_list"
+        android:id="@+id/menu_info"
         android:enabled="true"
-        android:icon="@drawable/ic_book"
+        android:icon="@drawable/ic_info"
         android:title="" />
     <item
-        android:id="@+id/menu_favorite"
+        android:id="@+id/menu_map"
         android:enabled="true"
-        android:icon="@drawable/ic_star"
+        android:icon="@drawable/ic_map"
         android:title="" />
 
     <item

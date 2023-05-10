@@ -1,15 +1,22 @@
 package com.example.smartbuspassenger
 
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
+import com.example.smartbuspassenger.ui.bottombar.InfoActivity
+import com.example.smartbuspassenger.ui.bottombar.UserActivity
+import com.example.smartbuspassenger.ui.routeList.RouteAdapter
+import com.example.smartbuspassenger.ui.routeList.RouteListViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.textfield.TextInputEditText
 import com.yandex.mapkit.Animation
@@ -21,19 +28,21 @@ import com.yandex.mapkit.traffic.TrafficColor
 import com.yandex.mapkit.traffic.TrafficLayer
 import com.yandex.mapkit.traffic.TrafficLevel
 import com.yandex.mapkit.traffic.TrafficListener
+import org.koin.androidx.viewmodel.ext.android.viewModel
+
 
 class MapActivity : AppCompatActivity(), TrafficListener {
 
     private var mapview: MapView? = null
     private var levelText: TextView? = null
     private var levelIcon: ImageButton? = null
+    private lateinit var recyclerGetter: ImageButton
+    private lateinit var recyclerView: RecyclerView
     private var trafficLevel: TrafficLevel? = null
     private var trafficFreshness: TrafficFreshness? = null
     private var traffic: TrafficLayer? = null
-
     private lateinit var searchEditText: EditText
     private lateinit var bottomBar: BottomNavigationView
-    private lateinit var recycler: RecyclerView
 
     private enum class TrafficFreshness {
         Loading, OK, Expired
@@ -51,25 +60,17 @@ class MapActivity : AppCompatActivity(), TrafficListener {
             Animation(Animation.Type.SMOOTH, 0.0f), null
         )
 
-        levelText = findViewById<TextView>(R.id.traffic_light_text)
-        levelIcon = findViewById<ImageButton>(R.id.traffic_light)
+        levelText = findViewById(R.id.traffic_light_text)
+        levelIcon = findViewById(R.id.traffic_light)
         traffic = MapKitFactory.getInstance().createTrafficLayer(mapview!!.mapWindow)
         traffic!!.isTrafficVisible = true
         traffic!!.addTrafficListener(this)
         updateLevel()
 
-        setupSearch()
-    }
-
-    private fun setupSearch() {
-        val textInput = findViewById<TextInputEditText>(R.id.searchEditText)
-        val recyclerView = findViewById<RecyclerView>(R.id.recycler)
-
-        textInput.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) return@setOnFocusChangeListener
-
-            recyclerView.isVisible = true
-        }
+        setupBindings()
+        setupUi()
+        setupSubscriptions()
+//        setupSearhc()
     }
 
     override fun onStop() {
@@ -102,21 +103,15 @@ class MapActivity : AppCompatActivity(), TrafficListener {
                 TrafficColor.YELLOW -> iconId = R.drawable.rec_yellow
                 else -> iconId = R.drawable.rec_grey
             }
-            level = Integer.toString(trafficLevel!!.level)
+            level = trafficLevel!!.level.toString()
         }
         levelIcon!!.setImageBitmap(BitmapFactory.decodeResource(resources, iconId))
         levelText!!.text = level
-        setupBindings()
-        setupUi()
     }
 
     fun onLightClick(view: View?) {
         traffic!!.isTrafficVisible = !traffic!!.isTrafficVisible
         updateLevel()
-    }
-
-    fun onClickBack(view: View?) {
-        finish()
     }
 
     override fun onTrafficChanged(trafficLevel: TrafficLevel?) {
@@ -137,32 +132,90 @@ class MapActivity : AppCompatActivity(), TrafficListener {
         updateLevel()
     }
 
+
+    private val vm: RouteListViewModel by viewModel()
+    private lateinit var adapter: RouteAdapter
+
     private fun setupBindings() {
-//        recycler = findViewById(R.id.recycler)
         bottomBar = findViewById(R.id.bottomNavigationView)
         searchEditText = findViewById(R.id.searchEditText)
+        recyclerView = findViewById(R.id.recycler)
+        recyclerGetter = findViewById(R.id.recyclerGetter)
     }
 
+//    var recyclerVisible = false
+//    private fun setupSearhc() {
+//        recyclerView.isVisible = false
+//        recyclerGetter.setImageBitmap(BitmapFactory.decodeResource(resources, R.drawable.arrow_up))
+//
+//        recyclerGetter.setOnClickListener {
+//            if (recyclerVisible == false) {
+//                recyclerGetter.setImageBitmap(BitmapFactory.decodeResource(resources, R.drawable.arrow_down))
+//                recyclerView.isVisible = true
+//                recyclerVisible = true
+//            } else if (recyclerVisible == true) {
+//                recyclerGetter.setImageBitmap(BitmapFactory.decodeResource(resources, R.drawable.arrow_up))
+//                recyclerView.isVisible = false
+//                recyclerVisible = false
+//            }
+//        }
+//    }
     private fun setupUi() {
-        bottomBar.selectedItemId = R.id.menu_list
+        bottomBar.selectedItemId = R.id.menu_map
         bottomBar.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.menu_profile -> {
-//                    startActivity(Intent(this, UserActivity::class.java))
+                    startActivity(Intent(this, UserActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.menu_info -> {
+                    startActivity(Intent(this, InfoActivity::class.java))
                     finish()
                     true
                 }
                 else -> false
             }
         }
+        var recyclerVisible: Boolean = false
+        recyclerView.isVisible = false
+        recyclerGetter.setImageBitmap(BitmapFactory.decodeResource(resources, R.drawable.arrow_up))
 
-        searchEditText.addTextChangedListener {
-            it?.let {
-//                vm.search(it.toString())
+        recyclerGetter.setOnClickListener {
+            if (!recyclerVisible) {
+                recyclerGetter.setImageBitmap(BitmapFactory.decodeResource(resources, R.drawable.arrow_down))
+                recyclerView.isVisible = true
+                recyclerVisible = true
+            } else if (recyclerVisible) {
+                recyclerGetter.setImageBitmap(BitmapFactory.decodeResource(resources, R.drawable.arrow_up))
+                recyclerView.isVisible = false
+                recyclerVisible = false
             }
         }
-
-//        setupRecycler()
+        searchEditText.addTextChangedListener {
+            it?.let {
+                vm.search(it.toString())
+            }
+        }
+        setupRecycler()
     }
 
+    private fun setupSubscriptions() {
+        vm.routes.observe(this) { list ->
+            adapter.updateList(list)
+        }
+    }
+
+    private fun setupRecycler() {
+        adapter = RouteAdapter {
+//            startActivity(
+//                Intent(
+//                    this,
+//                    BookActivity::class.java
+//                ).putExtra("bookId", it.id)
+//            )
+        }
+        recyclerView.adapter = adapter
+//        (recycler.layoutManager as GridLayoutManager).spanCount = 2
+    }
 }

@@ -10,8 +10,8 @@ interface TransportApi {
     @GET("routes")
     suspend fun getAllRoutes(): RoutesResponse
 
-    @GET("routes/{id}")
-    suspend fun findRouteById(@Path("id") id: Int): RouteResponse
+    @GET("routes/{name}")
+    suspend fun findRouteByName(@Query("name") name: String): RoutesResponse
 
     @GET("routes")
     suspend fun findRouteByTypeId(@Query("type") transportType: Int, @Query("route") route: String): RouteResponse

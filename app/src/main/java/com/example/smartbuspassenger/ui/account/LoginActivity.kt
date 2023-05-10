@@ -1,10 +1,12 @@
 package com.example.smartbuspassenger.ui.account
 
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import com.example.smartbuspassenger.MapActivity
 import com.example.smartbuspassenger.R
 import com.example.smartbuspassenger.data.api.TransportApi
@@ -45,7 +47,7 @@ class LoginActivity : AppCompatActivity() {
                         password.text.toString()
                     )
                 )
-
+//                AuthenticationState.AUTHENTICATED
                 println(user)
             }
             startActivity(Intent(this, MapActivity::class.java))

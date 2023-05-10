@@ -18,8 +18,7 @@ class SmartBusPassengerApplication : Application() {
     private fun setupDi() {
         startKoin {
             androidLogger()
-            androidContext(this@SmartBusPassengerApplication) //TODO спросить у Сережи, что это такое и как это работает
-            //modules(dataModule, presentationModule, networkModule)
+            androidContext(this@SmartBusPassengerApplication)
             modules(networkModule, dataModule)
         }
     }
