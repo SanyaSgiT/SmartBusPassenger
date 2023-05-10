@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">SmartBusPassenger</string>
+    <string name="register">Регистрация</string>
+    <string name="log_in">Вход</string>
+    <string name="welcome">Добро пожаловать в SmartBus!</string>
+    <string name="login">Логин</string>
+    <string name="password">Пароль</string>
+    <string name="log_in_acc">Вход в аккаунт</string>
+    <string name="question_register">Еще нет аккаунта?</string>
+    <string name="reg_in">Зарегистрироваться</string>
+    <string name="name">Имя Фамилия</string>
+    <string name="password2">Повторите пароль</string>
+    <string name="log_in2">Войти в аккаунт</string>
+    <string name="question2">Уже есть аккаунт?</string>
+    <string name="enter_route">Введите искомый маршрут</string>
+    <string name="registration">Регистрация</string>
+    <string name="card_data">Данные карты</string>
+    <string name="exit">Выход</string>
+    <string name="card_add">Добавление карты</string>
+    <string name="add_card">Запомнить карту</string>
+    <string name="next">Вы можете пропустить этот шаг:</string>
+    <string name="go_next">Пропустить</string>
+    <string name="card_num">Номер: **** **** **** 1082</string>
+    <string name="card">Номер карты</string>
+    <string name="card_code">CVV</string>
+    <string name="editing">Редактирование профиля</string>
+    <string name="card_editing">Редактирование карты</string>
+    <string name="info">О приложении SmartBus</string>
+    <string name="about">Данное приложение разработано в рамках стартапа, как выпускная квалификационная работа, студенткой Исаенко Александрой. Приложение поможет Вам смотреть маршруты движения общественного транспорта, ближайшие к Вам транспортные средства, а также осуществлять онлайн оплату проезда. Приложение само предложит Вам оплатить проезд, к тому времени мы уже будем знать, на каком транспорте Вы движетесь. Вам нужно только выбрать ценовой сегмент.</string>
+    <string name="lcky">Приятного Вам пути!</string>
+    <string name="drive">Мы обнаружили, что ты передвигаешься по маршруту</string>
+</resources>

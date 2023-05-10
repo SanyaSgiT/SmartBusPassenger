@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pay">
+        <item>От пункта A в пункт B - 30 руб.</item>
+        <item>От пункта A в пункт C - 45 руб.</item>
+        <item>От пункта A в пункт D - 60 руб.</item>
+        <item>Рыжик</item>
+    </string-array>
+</resources>
