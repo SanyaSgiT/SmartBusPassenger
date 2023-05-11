@@ -1,20 +1,20 @@
 package com.example.smartbuspassenger.ui.account
 
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
 import com.example.smartbuspassenger.MapActivity
 import com.example.smartbuspassenger.R
-import com.example.smartbuspassenger.data.api.TransportApi
 import com.example.smartbuspassenger.data.api.UserApi
 import com.example.smartbuspassenger.data.models.LoginRequest
+import com.example.smartbuspassenger.data.storage.UserStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 
 class LoginActivity : AppCompatActivity() {
@@ -24,7 +24,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var password: TextView
 
     private val userApi: UserApi by inject()
-    private val transportApi: TransportApi by inject()
+    private val userStorage: UserStorage by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,16 +41,29 @@ class LoginActivity : AppCompatActivity() {
 
         btnLogin.setOnClickListener {
             CoroutineScope(Dispatchers.IO).launch {
-                val user = userApi.authentication(
-                    LoginRequest(
-                        login.text.toString(),
-                        password.text.toString()
+                try {
+                    val user = userApi.authentication(
+                        LoginRequest(
+                            login.text.toString(),
+                            password.text.toString()
+                        )
                     )
-                )
+
+                    userStorage.token = user.token.token
+                    userStorage.user = user.user
+
+                    println(user)
+
+                    withContext(Dispatchers.Main) {
+                        startActivity(Intent(this@LoginActivity, MapActivity::class.java))
+                    }
+                } catch (_: Exception) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@LoginActivity, "Нет такого пользователя", Toast.LENGTH_LONG).show()
+                    }
+                }
 //                AuthenticationState.AUTHENTICATED
-                println(user)
             }
-            startActivity(Intent(this, MapActivity::class.java))
         }
     }
 }
