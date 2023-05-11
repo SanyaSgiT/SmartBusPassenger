@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide
 import com.example.smartbuspassenger.R
 import com.example.smartbuspassenger.data.repository.RoutesRepository
 import com.example.smartbuspassenger.domain.Route
+import com.example.smartbuspassenger.domain.TransportType
 
 class RouteAdapter(
     private val onRouteClicked: (Route) -> Unit
@@ -44,14 +45,30 @@ class RouteAdapter(
                 onRouteClicked(route)
             }
 
-            itemView.findViewById<TextView>(R.id.routeName).text = route.name
+            var itemRoute: String = ""
 
-//            val imageView = itemView.findViewById<ImageView>(R.id.image)
-//
-//            Glide
-//                .with(imageView)
-//                .load(book.imageUrl)
-//                .into(imageView)
+            val tType: String = newTrensportType(route.transportType)
+
+            itemRoute = itemRoute + tType + " " + route.name + "(" + route.firstStop.name + " - " + route.lastStop.name + ")"
+
+            itemView.findViewById<TextView>(R.id.routeName).text = itemRoute
+
+        }
+
+        fun newTrensportType(type: TransportType): String{
+            var tType: String = ""
+            if (type == TransportType.BUS){
+                tType = "Автобус"
+            }else if(type == TransportType.TROLLEY_BUS){
+                tType = "Троллейбус"
+            }else if(type == TransportType.Minibus){
+                tType = "Маршрутка"
+            }else if(type == TransportType.TRAM){
+                tType = "Трамвай"
+            }else if(type == TransportType.MINIBUS){
+                tType = "Маршрутка"
+            }
+            return tType
         }
     }
 

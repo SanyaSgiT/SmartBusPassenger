@@ -4,5 +4,6 @@ enum class TransportType {
     BUS,
     TROLLEY_BUS,
     TRAM,
-    Minibus
+    Minibus,
+    MINIBUS
 }

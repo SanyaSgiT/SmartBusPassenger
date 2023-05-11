@@ -6,7 +6,8 @@ import com.example.smartbuspassenger.domain.Route
 
 class RoutesRepository(private val api: TransportApi) {
     suspend fun getAllRoutes(): List<Route> = api.getAllRoutes().routes
-    suspend fun findRouteByName(name: String) = api.findRouteByName(name).routes
+    suspend fun findRouteByName(id: Int) = api.findRouteByName(id).routes
+    suspend fun getTrace(id: Int) = api.getTrace(id).traces
 
 //    suspend fun findRoutesById(id: Int) = api.findRouteById(id).books
 

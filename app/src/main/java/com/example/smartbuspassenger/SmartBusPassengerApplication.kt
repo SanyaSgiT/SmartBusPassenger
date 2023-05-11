@@ -4,6 +4,7 @@ import android.app.Application
 import com.example.smartbuspassenger.di.dataModule
 //import com.example.smartbuspassenger.di.dataModule
 import com.example.smartbuspassenger.di.networkModule
+import com.example.smartbuspassenger.di.presentationModule
 import org.koin.android.ext.koin.androidContext
 //import com.example.smartbuspassenger.di.presentationModule
 import org.koin.android.ext.koin.androidLogger
@@ -19,7 +20,7 @@ class SmartBusPassengerApplication : Application() {
         startKoin {
             androidLogger()
             androidContext(this@SmartBusPassengerApplication)
-            modules(networkModule, dataModule)
+            modules(networkModule, dataModule, presentationModule)
         }
     }
 }
