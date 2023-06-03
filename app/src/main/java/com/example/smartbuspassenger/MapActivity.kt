@@ -9,6 +9,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageButton
@@ -20,8 +21,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import com.example.smartbuspassenger.data.models.MarkersResponse
+import com.example.smartbuspassenger.domain.Route
 import com.example.smartbuspassenger.domain.Trace
+import com.example.smartbuspassenger.domain.Transport
+import com.example.smartbuspassenger.domain.TransportType
+import com.example.smartbuspassenger.ui.PayActivity
 import com.example.smartbuspassenger.ui.bottombar.InfoActivity
 import com.example.smartbuspassenger.ui.bottombar.UserActivity
 import com.example.smartbuspassenger.ui.routeList.RouteAdapter
@@ -34,6 +41,7 @@ import com.yandex.mapkit.geometry.Polyline
 import com.yandex.mapkit.layers.ObjectEvent
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.MapObjectCollection
+import com.yandex.mapkit.map.PolylineMapObject
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.mapkit.traffic.TrafficColor
 import com.yandex.mapkit.traffic.TrafficLayer
@@ -43,9 +51,17 @@ import com.yandex.mapkit.user_location.UserLocationLayer
 import com.yandex.mapkit.user_location.UserLocationObjectListener
 import com.yandex.mapkit.user_location.UserLocationView
 import com.yandex.runtime.image.ImageProvider
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.websocket.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.*
+import kotlinx.coroutines.*
+import kotlinx.serialization.json.Json
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.util.Date
-
+import java.util.*
+import kotlin.math.pow
+import com.example.smartbuspassenger.listPoint_bus_8
 
 class MapActivity : AppCompatActivity(), TrafficListener, UserLocationObjectListener {
 
@@ -72,10 +88,54 @@ class MapActivity : AppCompatActivity(), TrafficListener, UserLocationObjectList
 
     private var userLocationLayer: UserLocationLayer? = null
 
+    private var myLatitude: Double = 0.0
+    private var myLongitude: Double = 0.0
+    private var _myLatitude: Double = 0.0
+    private var _myLongitude: Double = 0.0
+    private lateinit var listRouteToIdentification: List<Route>
+
+    var count = 0
+    var countPoints = 0
+    var p = 0
+
     private val locationListener: LocationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
             showLocation(location)
+            myLatitude = location.latitude
+            myLongitude = location.longitude
             println(tvLocationGPS)
+            println("Широта $myLatitude")
+            println("Долгота $myLongitude")
+//            identificationRoute(listPoint_bus_8, myLatitude, myLongitude)
+
+            var route = ""
+            println(p)
+//            outerLoop@for(p in listPoint_bus_8.indices){
+                if ((myLatitude - listPoint_bus_8[p].latitude).pow(2.0)+(myLongitude - listPoint_bus_8[p].longitude).pow(2.0)<=(0.015).pow(2.0)){
+                    count++
+                    println("Найдена точка соприкосновения")
+                    if (count == 10){
+                        route = testData("bus_8")
+                        println("Вы движетесь по маршруту $route")
+                        Toast.makeText(this@MapActivity, "Движение по маршруту $route", Toast.LENGTH_LONG).show()
+                        //break@outerLoop
+                        val builder = AlertDialog.Builder(this@MapActivity)
+                        builder.setTitle("ОПЛАТА")
+                        builder.setMessage("Это замена активити оплаты")
+
+                        builder.setPositiveButton("OK") { dialog, which ->
+                            Toast.makeText(
+                                applicationContext,
+                                "OK", Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        builder.show()
+                    }
+                }else{
+                    println("Точка не прошла проверку")
+                }
+            p = countPoints++
+//            }
         }
 
         override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
@@ -83,6 +143,72 @@ class MapActivity : AppCompatActivity(), TrafficListener, UserLocationObjectList
                 tvStatusGPS = "Status: $status"
             }
         }
+    }
+    private fun identificationRoute(driver:List<Point>, myLatitude: Double, myLongitude: Double){
+        var flag = false
+        var route = ""
+        outerLoop@for(p in driver.indices){
+//            val value = (myLatitude - driver[p].latitude).pow(2.0)
+//            val value2 = (myLongitude - driver[p].longitude).pow(2.0)
+//            println("Широта $myLatitude Долгота $myLongitude")
+            if ((myLatitude - driver[p].latitude).pow(2.0)+(myLongitude - driver[p].longitude).pow(2.0)<=(0.001).pow(2.0)){
+                flag = true
+                count++
+                println("Найдена точка соприкосновения")
+                if (count > 10){
+                    route = testData("bus_8")
+                    println("Вы движетесь по маршруту $route")
+                    Toast.makeText(this@MapActivity, "Движение по маршруту $route", Toast.LENGTH_LONG).show()
+                    break@outerLoop
+                }
+            }else{
+                println("Точка не прошла проверку")
+            }
+        }
+//        lifecycleScope.launch {
+//            withContext(Dispatchers.Main) {
+//                val intent = Intent(this@MapActivity, PayActivity::class.java)
+//                    .putExtra("Route", route)
+//                startActivity(intent)
+//            }
+//        }
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("")
+        builder.setMessage("Маршрут номер")
+
+        builder.setPositiveButton("OK") { dialog, which ->
+            Toast.makeText(
+                applicationContext,
+                "OK", Toast.LENGTH_SHORT
+            ).show()
+        }
+        builder.show()
+    }
+
+    private fun testData(name: String): String{
+        if(name == "bus_8"){
+            return "Автобус 8"
+        }else if(name == "tram_18"){
+            return "Трамвай 18"
+        }else if(name == "bus_1"){
+            return "Автобус 1"
+        }else if(name == "bus_18"){
+            return "Автобус 18"
+        }else if(name == "tram_3"){
+            return "Трамвай 3"
+        }else if(name == "minibus_9"){
+            return "Маршрутка 9"
+        }else if(name == "minibus_72"){
+            return "Маршрутка 72"
+        }else if(name == "troll_4"){
+            return "Троллейбус 4"
+        }else if(name == "troll_13"){
+            return "Троллейбус 13"
+        }else if(name == "troll_10"){
+            return "Троллейбус 10"
+        }
+        return ""
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -229,6 +355,18 @@ class MapActivity : AppCompatActivity(), TrafficListener, UserLocationObjectList
     private fun setupSubscriptions() {
         vm.routes.observe(this) { list ->
             adapter.updateList(list)
+            listRouteToIdentification = list
+            lifecycleScope.launch {
+                if(myLatitude != _myLatitude && myLongitude != _myLongitude){
+                    myLatitude = _myLatitude
+                    myLongitude = _myLongitude
+                    Toast.makeText(this@MapActivity, "Старт идентификации", Toast.LENGTH_LONG).show()
+                }else{
+                    Toast.makeText(this@MapActivity, "Пользователь не движется", Toast.LENGTH_LONG).show()
+                }
+                println("Выводим список полученных маршрутов")
+                println(listRouteToIdentification)
+            }
         }
 
         vm.traces.observe(this) { traces ->
@@ -237,6 +375,8 @@ class MapActivity : AppCompatActivity(), TrafficListener, UserLocationObjectList
             }
         }
     }
+
+    var routeNum: String = ""
 
     private fun setupRecycler() {
         adapter = RouteAdapter {
@@ -247,35 +387,141 @@ class MapActivity : AppCompatActivity(), TrafficListener, UserLocationObjectList
             builder.setPositiveButton("OK") { dialog, which ->
                 Toast.makeText(
                     applicationContext,
-                    "YES", Toast.LENGTH_SHORT
+                    "OK", Toast.LENGTH_SHORT
                 ).show()
             }
 
-            builder.setNegativeButton(android.R.string.no) { dialog, which ->
+            builder.setNegativeButton("Отмена") { dialog, which ->
                 Toast.makeText(
                     applicationContext,
-                    "NO", Toast.LENGTH_SHORT
-                ).show()
-            }
-
-            builder.setNeutralButton("Maybe") { dialog, which ->
-                Toast.makeText(
-                    applicationContext,
-                    "Maybe", Toast.LENGTH_SHORT
+                    "Отмена", Toast.LENGTH_SHORT
                 ).show()
             }
             builder.show()
             vm.drawRoute(it.id)
+
+            val tType: String = newTransportType(it.transportType)
+            routeNum = routeNum + tType + " " + it.name
         }
         recyclerView.adapter = adapter
     }
 
+    private fun newTransportType(type: TransportType): String {
+        var tType = ""
+        if (type == TransportType.BUS) {
+            tType = "Автобус"
+        } else if (type == TransportType.TROLLEY_BUS) {
+            tType = "Троллейбус"
+        } else if (type == TransportType.Minibus) {
+            tType = "Маршрутка"
+        } else if (type == TransportType.TRAM) {
+            tType = "Трамвай"
+        } else if (type == TransportType.MINIBUS) {
+            tType = "Маршрутка"
+        }
+        return tType
+    }
+
+    private val json = Json { ignoreUnknownKeys = true }
+
     private fun drawTrace(traces: List<Trace>) {
+
+        mapObjects.clear()
+
         val points = traces.map {
             Point(it.latLng.lat, it.latLng.lng)
         }
+        println("Точки маршрута")
+        println(points)
 
-        mapObjects.addPolyline(Polyline(points))
+//        for(p in points.indices){
+//            val value = (myLatitude - points[p].latitude).pow(2.0)
+//            val value2 = (myLongitude - points[p].longitude).pow(2.0)
+////            println("Широта $myLatitude Долгота $myLongitude")
+//            if ((myLatitude - points[p].latitude).pow(2.0)+(myLongitude - points[p].longitude).pow(2.0)<=(0.15).pow(2.0)){
+//                println("Движение по маршруту $routeNum")
+////                Toast.makeText(this@MapActivity, "Движение по маршруту $routeNum", Toast.LENGTH_LONG).show()
+//            }else{
+//                println("Вы не на маршруте $routeNum")
+//                println("Широта $value Долгота $value2")
+////                Toast.makeText(this@MapActivity, "Вы не на маршруте $routeNum", Toast.LENGTH_LONG).show()
+//            }
+//        }
+
+        val polyline: PolylineMapObject = mapObjects.addPolyline(Polyline(points))
+        polyline.setStrokeColor(Color.BLUE)
+        polyline.setZIndex(100.0f)
+
+        for(i in traces.indices){
+            if(traces[i].stop != null){
+                val stop = mapObjects.addPlacemark(Point(traces[i].latLng.lat, traces[i].latLng.lng))
+                stop.opacity = 0.5f
+                stop.setIcon(ImageProvider.fromResource(this, R.drawable.stop))
+                stop.isDraggable = true
+            }
+        }
+
+        val client = HttpClient(CIO) {
+            install(WebSockets) {
+                contentConverter = KotlinxWebsocketSerializationConverter(Json)
+            }
+        }
+
+        lifecycleScope.launchWhenCreated {
+            client.webSocket(method = HttpMethod.Get, host = "37.194.210.121", port = 4721, path = "/markers/json") {
+                while (isActive){
+                    val transport = receiveDeserialized<MarkersResponse>()
+                    println(transport)
+                    val mark = transport.markers
+                    addBusOnMap(mark, routeNum)
+                }
+            }
+        }
+
+//        Toast.makeText(this@LoginActivity, "Нет такого пользователя", Toast.LENGTH_LONG).show()
+//        Toast.makeText(this@LoginActivity, "Нет такого пользователя", Toast.LENGTH_LONG).show()
+//        lifecycleScope.launch {
+//            if(myLatitude != _myLatitude && myLongitude != _myLongitude){
+//                myLatitude = _myLatitude
+//                myLongitude = _myLongitude
+//                Toast.makeText(this@MapActivity, "Старт идентификации", Toast.LENGTH_LONG).show()
+//            }else{
+//                Toast.makeText(this@MapActivity, "Пользователь не движется", Toast.LENGTH_LONG).show()
+//            }
+//            println("Выводим список полученных маршрутов")
+//            println(listRouteToIdentification)
+//        }
+        
+//        lifecycleScope.launch {
+//            withContext(Dispatchers.Main) {
+//                val intent = Intent(this@MapActivity, PayActivity::class.java)
+//                    .putExtra("Route", routeNum)
+//                startActivity(intent)
+//            }
+//        }
+    }
+
+    fun onMyLocationChange(location: Location) {
+
+    }
+
+    private fun addBusOnMap(mark: List<Transport>, routeNum:String){
+        for(i in mark.indices){
+            if(routeNum == mark[i].route){
+                val bus = mapObjects.addPlacemark(Point(mark[i].latLng.lat, mark[i].latLng.lng))
+                bus.opacity = 0.5f
+                if(mark[i].transportType == TransportType.BUS){
+                    bus.setIcon(ImageProvider.fromResource(this, R.drawable.bus))
+                }else if(mark[i].transportType == TransportType.TROLLEY_BUS){
+                    bus.setIcon(ImageProvider.fromResource(this, R.drawable.trollbus))
+                }else if(mark[i].transportType == TransportType.MINIBUS || mark[i].transportType == TransportType.Minibus){
+                    bus.setIcon(ImageProvider.fromResource(this, R.drawable.minibus))
+                }else if(mark[i].transportType == TransportType.TRAM){
+                    bus.setIcon(ImageProvider.fromResource(this, R.drawable.tram))
+                }
+                bus.isDraggable = true
+            }
+        }
     }
 
     private fun requestLocationPermission() {
@@ -308,7 +554,6 @@ class MapActivity : AppCompatActivity(), TrafficListener, UserLocationObjectList
                 locationListener
             )
         }
-
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
@@ -318,7 +563,6 @@ class MapActivity : AppCompatActivity(), TrafficListener, UserLocationObjectList
                 this, R.drawable.user_arrow
             )
         )
-
         userLocationView.accuracyCircle.fillColor = Color.BLUE and -0x66000001
     }
 
@@ -354,10 +598,20 @@ class MapActivity : AppCompatActivity(), TrafficListener, UserLocationObjectList
     }
 
     private fun formatLocation(location: Location?): String {
-        return if (location == null) "" else String.format(
-            "Coordinates: lat = %1$.4f, lon = %2$.4f, time = %3\$tF %3\$tT",
-            location.latitude, location.longitude, Date(location.time)
-        )
+        return if (location == null){
+            ""
+        }else{
+            myLatitude = location.latitude
+            myLongitude = location.longitude
+            String.format(
+                "Coordinates: lat = %1$.4f, lon = %2$.4f, time = %3\$tF %3\$tT",
+                location.latitude, location.longitude, Date(location.time)
+            )
+        }
+//        return if (location == null) "" else String.format(
+//            "Coordinates: lat = %1$.4f, lon = %2$.4f, time = %3\$tF %3\$tT",
+//            location.latitude, location.longitude, Date(location.time)
+//        )
     }
 
     private enum class TrafficFreshness {

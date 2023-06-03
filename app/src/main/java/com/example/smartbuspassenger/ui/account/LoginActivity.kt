@@ -62,7 +62,6 @@ class LoginActivity : AppCompatActivity() {
                         Toast.makeText(this@LoginActivity, "Нет такого пользователя", Toast.LENGTH_LONG).show()
                     }
                 }
-//                AuthenticationState.AUTHENTICATED
             }
         }
     }
